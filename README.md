@@ -7,7 +7,7 @@ Celem misji jest wysłanie komórek ludzkich i zwierzęcych różnego typu na po
 * na pokładzie balonu znajdować się będą czujniki umożliwiające pomiar dawki promieniowania
 
 ## Opis systemu
-![#uml](http://www.plantuml.com/plantuml/png/SoWkIImgAStDuOfspyzBoSz9L4XAhCelJunLqDEpKuWEBabCpafKo4kioapDpKkCvK8JWQh3q6obu9CVb8ZTKBXWbK9gTd51Qb5bRcfUIMekI5Tufbic5su5c7Q1dLHP39HLo4z9pZmoCpaJQ8sDdXw6EYi59nzNBbmU272ELU02abZz3VPGGNvHYK9nLMfHQdf-UIMNGsfU2Z3S0000)
+![#uml](https://github.com/simle-stardust/docs/blob/master/general-diagram.jpg)
 
 ### Gondola sensorowa
 Zawierać będzie trzy płytki PCB. Pierwsza z nich zawierać będzie:
