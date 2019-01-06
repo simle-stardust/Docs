@@ -71,9 +71,21 @@ Stacja naziemna komunikuje się z komputerem poprzez port szeregowy, wykorzystuj
 
 **Payload**   
 Właściwa zawartość ramki LoRaWAN wysłanej z balonu zbudowana jest w następujący sposób:  
-`[ALT1][ALT0][TEMP1][TEMP0][LF1][LF0][ST1][ST0]`
+`[ALT1][ALT0][LAT3][LAT2][LAT1][LAT0][LON3][LON2][LON1][LON0][TEMP1][TEMP0][TEMPINFO2][TEMPINFO1][TEMPINFO0][LF1][LF0][ST1][ST0]`
 * `[ALT1][ALT0]` - starszy i młodszy bajt zawierające wysokość, np. `0x1234` oznacza wysokość `4660m`
-* `[TEMP1][TEMP0]` - starszy i młodszy bajt zawierające temperaturę przemnożoną przez 100, np. `0x1234` oznacza tempraturę `46.60°C`
+* `[LAT3][LAT2][LAT1][LAT0]` - 4 bajty zawierające szerokość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0x20527EC6` oznacza `5422.77318 N` (litera domyślnie bo przecież półkuli nie zmienimy w trakcie lotu),
+* `[LON3][LON2][LON1][LON0]` - 4 bajty zawierające długość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0xAF21BF0` oznacza `1836.39024 E` (litera jw.)
+* `[TEMP1][TEMP0]` - starszy i młodszy bajt zawierające średnią temperaturę próbek przemnożoną przez 100, np. `0x1234` oznacza tempraturę `46.60°C`
+* `[TEMPINFO2][TEMPINFO1][TEMPINFO0]` - 3 bajty (24 bity) zawierające informacje o teperaturach każdej próbki (jest 12 próbek, numerowanie od 11 do 0), każde kolejne dwa bity to info o próbce, zakodowane w następujący sposób:
+    * `00` - temperatura ok (między 35 a 37 stopni)
+    * `01` - temperatura za wysoka (powyżej 37)
+    * `10` - teperatura za niska (poniżej 35)
+    * `11` - jakiś error code, np. awaria czujnika    
+    * Czyli jeśli nasze 3 bajty `TEMPINFO` wyglądają tak: `0x1500A0`, czyli `000101010000000010100000`, czyli możemy to podzielić na
+  `|00|01|01|01|00|00|00|00|10|10|00|00`, to wiemy że:  
+      * próbki nr 11, 7, 6, 5, 4, 1, 0 mają emperatury OK,
+      * próbki nr 10, 9, 8 mają za wysoką temperaturę,
+      * próbki nr 3, 2 mają za niską temperaturę.
 * `[LF1][LF0]` - starszy i młodszy bajt ostatnio odebranej ramki ze stacji, np. `0x0101` oznacza że odebrano ramkę `0x0101`
 * `[ST1][ST0]` - starszy i młodszy bajt statusu, łącznie 16 bitów, każdy bit odpowiada za inny error:  
      * `I2C_PRESSURE_ERR` - błąd czujnika ciśnienia HSC, gdy zerowy bit `Status` = `1`  
