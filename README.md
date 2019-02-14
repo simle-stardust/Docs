@@ -1,4 +1,4 @@
-# 2 misja projektu Antares - styczeń 2019
+# 2 misja projektu Antares - czerwiec 2019
 Celem misji jest wysłanie komórek ludzkich i zwierzęcych różnego typu na pokładzie balonu stratosferycznego, aby wystawić je na działanie promieniowania obecnego w stratosferze, które jest wielokrotnie wyższe niż na powierzchni Ziemi. 
 
 **Główne założenia:**
@@ -71,8 +71,8 @@ Stacja naziemna komunikuje się z komputerem poprzez port szeregowy, wykorzystuj
 
 **Payload**   
 Właściwa zawartość ramki LoRaWAN wysłanej z balonu zbudowana jest w następujący sposób:  
-`[ALT1][ALT0][LAT3][LAT2][LAT1][LAT0][LON3][LON2][LON1][LON0][TEMP1][TEMP0][TEMPINFO2][TEMPINFO1][TEMPINFO0][LF1][LF0][ST1][ST0]`
-* `[ALT1][ALT0]` - starszy i młodszy bajt zawierające wysokość, np. `0x1234` oznacza wysokość `4660m`
+`[ALT3][ALT2][ALT1][ALT0][LAT3][LAT2][LAT1][LAT0][LON3][LON2][LON1][LON0][TEMP1][TEMP0][TEMPINFO2][TEMPINFO1][TEMPINFO0][LF1][LF0][ST1][ST0][STKOM1][STKOM0]`
+* `[ALT3][ALT2][ALT1][ALT0]` - 4 bajty zawierające wysokość, np. `0x00001234` oznacza wysokość `4660m`
 * `[LAT3][LAT2][LAT1][LAT0]` - 4 bajty zawierające szerokość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0x20527EC6` oznacza `5422.77318 N` (litera domyślnie bo przecież półkuli nie zmienimy w trakcie lotu),
 * `[LON3][LON2][LON1][LON0]` - 4 bajty zawierające długość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0xAF21BF0` oznacza `1836.39024 E` (litera jw.)
 * `[TEMP1][TEMP0]` - starszy i młodszy bajt zawierające średnią temperaturę próbek przemnożoną przez 100, np. `0x1234` oznacza tempraturę `46.60°C`
@@ -104,3 +104,51 @@ Właściwa zawartość ramki LoRaWAN wysłanej z balonu zbudowana jest w następ
      * `BLE_ERR` - błąd komunikacji za pomocą Bluetooth, gdy 13 bit `Status` = `1`  
      * `UNDEF_ERR1` - **do uzgodnienia**, gdy 14 bit `Status` = `1`  
      * `UNDEF_ERR2` - **do uzgodnienia**, gdy 15 bit `Status` = `1`  
+* `[STKOM1][STKOM0]` - starszy i młodszy bajt statusu gondoli z komórkami, na razie nie wiadomo jakie dokładnie tam będą wartości (musiałoby ruszyć programowanie gondoli z komórkami)
+
+### Protokół komunikacji przez WiFi [WIP]
+Schemat blokowy komunikacji przez WiFi przedstawiony jest poniżej:  
+![#wifi-proto](https://github.com/simle-stardust/docs/blob/master/wifi-proto.png)  
+Główną rolę pełni ESP8266 obecne w gondoli głównej. Udostępnia ono sieć lokalną po podłączeniu do której możliwe jest wyświetlenie aktualnych danych pomiarowych np. przez przeglądarkę. Dane które powinny być udostępnione na serwerze to:  
+**Dane z gondoli głównej**
+* dane z zegara czasu rzeczywistego - godzina, minuta, sekunda \[3 bajty/24 bitów\],  
+* 7 temperatur z czujników DS18B20 \[każdy ma 2 bajty/16 bitów\],  
+* dane z czujnika wilgotności  \[2 bajty/16 bitów\],   
+* dane z czujnika ciśnienia  \[2 bajty/16 bitów\],  
+* szerokość geograficzna \[4 bajty/32 bitów\],   
+* długość geograficzna \[4 bajty/32 bitów\],   
+* wysokość \[4 bajty/32 bitów\],  
+* status flagi \[2 bajty/16 bitów\],  
+  
+**Dane z gondoli komórkowej**
+* 30 temperatur z czujników RTD z gondoli komórkowej \[każdy ma 2 bajty/16 bitów\],  
+* 12 statusów sygnału sterującego mosfetami \[każdy ma 2 bajty/16 bitów\],   
+* status flagi gondoli z komórkami  \[2 bajty/16 bitów\].  
+  
+**Dane z odcinacza**
+* status odcinacza - czy sygnał odcinający został uruchomiony  \[1 bajt/8 bitów\]. (1 bit by wystarczył ale pewnie łatwiej będzie parsować dane bajtami).
+  
+Aby aktualizować i pobierać dane z serwera, poszczególne moduły ESP powinny obsługiwać następujące komendy przez interfejs UART:
+>Uwaga! Wartości w kwadratowych nawiasach powinny być traktowane jako surowe bajty a nie jako znaki kodu ASCII!!!  
+**ESP8266 w gondoli głównej**  
+* `@MarcinOdcinaj!` - powoduje wysłanie komendy do odcinacza skutkującej włączeniem przepływu prądu przez drut oporowy (odcięcie balonu). Całkowita długość ramki, łącznie z headerem i znakiem końca to 15 bajtów.  
+* `@MarcinSetValues:[HH],[MM],[SS],[DS18B20_1_1][DS18B20_1_0],[DS18B20_2_1][DS18B20_2_0],[DS18B20_3_1][DS18B20_3_0],[DS18B20_4_1][DS18B20_4_0],[DS18B20_5_1][DS18B20_5_0],[DS18B20_6_1][DS18B20_6_0],[DS18B20_7_1][DS18B20_7_0],[HUM1][HUM0],[PRES1][PRES0],[LAT3][LAT2][LAT1][LAT0],[LON3][LON2][LON1][LON0],[ALT3][ALT2][ALT1][ALT0],[SF1][SF0]!` - powoduje ustawienie wysłanych wartości jako aktualne wartości pomiarowe na serwerze. Całkowia długość komendy, łącznie z headerem i znakiem końca to 68 bajtów. Poszczególne zmienne oznaczają:
+  * `[HH]` - godzina,  
+  * `[MM]` - minuta,  
+  * `[SS]` - sekunda,  
+  * `[DS18B20_x_1][DS18B20_x_0]` - starszy i młodszy bajt temperatury z czujnika DS18B20 o numerze `x`,  
+  * `[HUM1][HUM0]` - starszy i młodszy bajt wilgotności,  
+  * `[PRES1][PRES0]` - starszy i młodszy bajt ciśnienia,  
+  * `[LAT3][LAT2][LAT1][LAT0]` - 4 bajty zawierające szerokość geograficzną,  
+  * `[LON3][LON2][LON1][LON0]` - 4 bajty zawierające długość geograficzną,  
+  * `[ALT3][ALT2][ALT1][ALT0]` - 4 bajty zawierające wysokość,  
+  * `[SF1][SF0]` - 2 bajty zawierające status flagi.  
+* `@MarcinGetValues!` powoduje zwrócenie aktualnych wartości pomiarowych z serwera. Całkowita długość komendy to 17 bajtów. Odpowiedź na tą komendę powinna mieć postać  
+`@MarcinOK:[RTD1_1][RTD1_0],[RTD2_1][RTD2_0],[RTD3_1][RTD3_0],[RTD4_1][RTD4_0],[RTD5_1][RTD5_0],[RTD6_1][RTD6_0],[RTD7_1][RTD7_0],[RTD8_1][RTD8_0],[RTD9_1][RTD9_0],[RTD10_1][RTD10_0],[RTD11_1][RTD11_0],[RTD12_1][RTD12_0]!` (łączna długość = 46 bajtów), gdzie:
+  * `[RTDx_1]` - starszy i młodszy bajt temperatury z RTD o numerze `x`,  
+  
+**ESP8266 w gondoli z komórkami**
+* `@MarcinSetValuesKom:[RTD1_1][RTD1_0],[RTD2_1][RTD2_0],[RTD3_1][RTD3_0],(...),[RTD30_1][RTD30_0],[MOSFET1_1][MOSFET1_0],[MOSFET2_1][MOSFET2_0],(...),[MOSFET12_1][MOSFET12_0],[SFKOM1][SFKOM0]!` - powoduje utawienie wysłanych wartości jako aktualne wartości pomiarowe na serwerze. Łączna długość ramki to 150 bajtów. Poszczególne zmienne oznaczają:
+  * `[RTDx_1][RTDx_0]` - starszy i młodszy bajt temperatury z RTD o numerze `x`,  
+  * `[MOSFET12_1][MOSFET12_0]` - starszy i młodszy bajt sygnału sterującego MOSFETAMI,
+  * `[SFKOM1][SFKOM0]` - status flagi gondoli z komórkami.
