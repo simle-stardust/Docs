@@ -110,6 +110,7 @@ Właściwa zawartość ramki LoRaWAN wysłanej z balonu zbudowana jest w następ
 Schemat blokowy komunikacji przez WiFi przedstawiony jest poniżej:  
 ![#wifi-proto](https://github.com/simle-stardust/docs/blob/master/wifi-proto.png)  
 Główną rolę pełni ESP8266 obecne w gondoli głównej. Udostępnia ono sieć lokalną po podłączeniu do której możliwe jest wyświetlenie aktualnych danych pomiarowych np. przez przeglądarkę. Dane które powinny być udostępnione na serwerze to:  
+  
 **Dane z gondoli głównej**
 * dane z zegara czasu rzeczywistego - godzina, minuta, sekunda \[3 bajty/24 bitów\],  
 * 7 temperatur z czujników DS18B20 \[każdy ma 2 bajty/16 bitów\],  
