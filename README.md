@@ -52,9 +52,9 @@ Stacja naziemna komunikuje się z komputerem poprzez port szeregowy, wykorzystuj
 ![#interface](https://github.com/simle-stardust/docs/blob/master/interface.png)  
 
 Powyższe ramki zbudowane są następująco:  
-> każdy nawias kwadratowy to jeden bajt
-> przedrostek `0x` oznacza zapis heksadecymalny
-`[ALT3][ALT2][ALT1][ALT0][LAT3][LAT2][LAT1][LAT0][LON3][LON2][LON1][LON0][TEMP1][TEMP0][TEMPINFO2][TEMPINFO1][TEMPINFO0][LF1][LF0][ST1][ST0][STKOM1][STKOM0]`
+`[ALT3][ALT2][ALT1][ALT0][LAT3][LAT2][LAT1][LAT0][LON3][LON2][LON1][LON0][TEMP1][TEMP0][TEMPINFO2][TEMPINFO1][TEMPINFO0][LF1][LF0][ST1][ST0][STKOM1][STKOM0]`  
+> każdy nawias kwadratowy to jeden bajt  
+> przedrostek `0x` oznacza zapis heksadecymalny  
 * `[ALT3][ALT2][ALT1][ALT0]` - 4 bajty zawierające wysokość, np. `0x00001234` oznacza wysokość `4660m`
 * `[LAT3][LAT2][LAT1][LAT0]` - 4 bajty zawierające szerokość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0x20527EC6` oznacza `5422.77318 N` (litera domyślnie bo przecież półkuli nie zmienimy w trakcie lotu),
 * `[LON3][LON2][LON1][LON0]` - 4 bajty zawierające długość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0xAF21BF0` oznacza `1836.39024 E` (litera jw.)
