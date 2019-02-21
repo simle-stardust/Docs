@@ -51,26 +51,9 @@ Zawierać będzie płytkę PCB odpowiedzialną za pomiar temperatury próbek bio
 Stacja naziemna komunikuje się z komputerem poprzez port szeregowy, wykorzystując interfejs UART mikrokontrolera STM32 będącego centralnym elementem stacji naziemnej. W chwili obecnej komunikaty wysyłane na komputer wyglądają następująco:   
 ![#interface](https://github.com/simle-stardust/docs/blob/master/interface.png)  
 
-* 1 - komunikat o braku odebrania pakietu w ciągu ostatnich ~20 sekund
-* 2 - surowy, nieprzetworzony pakiet odebrany przez stację naziemną, zgodny z protokołem LoRaWAN ([dokumentacja protokołu](https://lora-alliance.org/sites/default/files/2018-04/lorawantm_specification_-v1.1.pdf) )  
- `[MHDR][DevAddr][Fctrl][Fcnt][Fport][Payload][MIC]`
-     * `[MHDR]` - 1 bajtowy nagłówek LoRaWAN, w naszym przypadku zawsze `0x40`,
-     * `[DevAddr]` - 4 bajtowy adres urządzenia, little endian, w naszym przypadku zawsze `0xC5130126`,
-     * `[Fctrl]` - 1 bajt różnych opcje kontrolne, u nas nieużywane i zawsze `0x00`,
-     * `[Fcnt]` - 2 bajtowy licznik wysłanych ramek, little endian,
-     * `[Fport]` - 1 bajtowy port, u nas zawsze `0x01`,
-     * `[Payload]` - 8 bajtów właściwej wiadomości (w przyszłości pewnie więcej), zaszyfrowane za pomocą algorytmu AES128 przy użyciu supertajnych kluczy urządzenia, na obrazku jest to `DEE18036B75476EE`
-     * `[MIC]` - 4 bajty Message Integrity Code, coś w stylu CRC, obliczane na podstawie kluczy urządzenia i licznika wysłanych ramek, dzięki temu mamy pewność że wiadomość faktycznie pochodzi z naszego urządzenia
-* 3 - wartości uzyskane po odszyfrowaniu i odpowiednim przetworzeniu pola `Payload` ramki LoRaWAN, jest to
-     * `Alt` - wysokość
-     * `Temp` - temperatura
-     * `Status` - specjalna zmienna zawierająca zakodowany stan balonu - tzn. stan czujników, co działa, co nie działa itd.
-     * `Last received frame` - ostatnia wiadomość którą odebrał balon ze stacji nadawczej, `0xFFFF` oznacza że nie odebrano żadnej. Komunikacja z balonem jest obustronna, po odebraniu każdego pakietu z balonu stacja nadawcza automatycznie wysyła 2 bajty wiadomości potwierdzającej. Domyślnie jest to `0x0001`, użytkownik może zmodyfikować wysyłaną wiadomość poprzez nadanie przez UART odpowiedniego znaku, **jeszcze do uzgodnienia**
-* 4 - komunikaty o błędach czujników wyznaczone na podstawie zmiennej `Status`
-* 5 - SNR i RSSI odebranego pakietu
-
-**Payload**   
-Właściwa zawartość ramki LoRaWAN wysłanej z balonu zbudowana jest w następujący sposób:  
+Powyższe ramki zbudowane są następująco:  
+> każdy nawias kwadratowy to jeden bajt
+> przedrostek `0x` oznacza zapis heksadecymalny
 `[ALT3][ALT2][ALT1][ALT0][LAT3][LAT2][LAT1][LAT0][LON3][LON2][LON1][LON0][TEMP1][TEMP0][TEMPINFO2][TEMPINFO1][TEMPINFO0][LF1][LF0][ST1][ST0][STKOM1][STKOM0]`
 * `[ALT3][ALT2][ALT1][ALT0]` - 4 bajty zawierające wysokość, np. `0x00001234` oznacza wysokość `4660m`
 * `[LAT3][LAT2][LAT1][LAT0]` - 4 bajty zawierające szerokość geograficzną odczytaną z GPS, pomnożoną przez 10000 np. `0x20527EC6` oznacza `5422.77318 N` (litera domyślnie bo przecież półkuli nie zmienimy w trakcie lotu),
