@@ -128,8 +128,9 @@ Aby aktualizować i pobierać dane z serwera, poszczególne moduły ESP powinny 
   * `[ALT3][ALT2][ALT1][ALT0]` - 4 bajty zawierające wysokość,  
   * `[SF1][SF0]` - 2 bajty zawierające status flagi.  
 * `@MarcinGetValues!` powoduje zwrócenie aktualnych wartości pomiarowych z serwera. Całkowita długość komendy to 17 bajtów. Odpowiedź na tą komendę powinna mieć postać  
-`@MarcinOK:[RTD1_1][RTD1_0],[RTD2_1][RTD2_0],[RTD3_1][RTD3_0],[RTD4_1][RTD4_0],[RTD5_1][RTD5_0],[RTD6_1][RTD6_0],[RTD7_1][RTD7_0],[RTD8_1][RTD8_0],[RTD9_1][RTD9_0],[RTD10_1][RTD10_0],[RTD11_1][RTD11_0],[RTD12_1][RTD12_0]!` (łączna długość = 46 bajtów), gdzie:
+`@MarcinOK:[RTD1_1][RTD1_0],[RTD2_1][RTD2_0],[RTD3_1][RTD3_0],[RTD4_1][RTD4_0],[RTD5_1][RTD5_0],[RTD6_1][RTD6_0],[RTD7_1][RTD7_0],[RTD8_1][RTD8_0],[RTD9_1][RTD9_0],[RTD10_1][RTD10_0],[RTD11_1][RTD11_0],[RTD12_1][RTD12_0],[SFKOM1][SFKOM0]!` (łączna długość = 46 bajtów), gdzie:
   * `[RTDx_1]` - starszy i młodszy bajt temperatury z RTD o numerze `x`,  
+  * `[SFKOM1][SFKOM0]` - status flagi gondoli z komórkami.
   
 **ESP8266 w gondoli z komórkami**
 * `@MarcinSetValuesKom:[RTD1_1][RTD1_0],[RTD2_1][RTD2_0],[RTD3_1][RTD3_0],(...),[RTD30_1][RTD30_0],[MOSFET1_1][MOSFET1_0],[MOSFET2_1][MOSFET2_0],(...),[MOSFET12_1][MOSFET12_0],[SFKOM1][SFKOM0]!` - powoduje utawienie wysłanych wartości jako aktualne wartości pomiarowe na serwerze. Łączna długość ramki to 150 bajtów. Poszczególne zmienne oznaczają:
